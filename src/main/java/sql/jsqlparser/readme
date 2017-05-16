@@ -1,0 +1,6 @@
+#########################################
+参考地址:https://github.com/JSQLParser/JSqlParser
+wiki:https://github.com/JSQLParser/JSqlParser/wiki
+#########################################
+
+JSqlParser是SQL解析器,其通过JavaCC解析SQL语句并生产SQL结构.用户只需要通过实现观察者接口(SelectVisitor,FromItemVisitor)等实现对SQL的遍历.
