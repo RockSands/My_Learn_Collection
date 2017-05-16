@@ -1,0 +1,40 @@
+/* adder.jj Adding up numbers */
+options 
+{ 
+  static = false; 
+}
+PARSER_BEGIN(Adder) 
+package javacc.add;
+public class Adder 
+{ 
+  public static void main(String args []) throws ParseException 
+  { 
+    Adder parser = new Adder(System.in); 
+    parser.start(); 
+  } 
+} 
+PARSER_END(Adder)
+SKIP : 
+{ 
+  " " 
+| "\r" 
+| "\t" 
+| "\n" 
+}
+TOKEN : /* OPERATORS */ 
+{ 
+  < PLUS : "+" > 
+}
+TOKEN : 
+{ 
+  < NUMBER : ([ "0"-"9" ])+ > 
+}
+void start() : 
+{} 
+{ 
+  <NUMBER> 
+  ( 
+    <PLUS> 
+    <NUMBER> 
+  )* 
+}
