@@ -1,1 +1,5 @@
 gson是google退出的json解析jar包.其性能以及居中比较稳定,但是推广度不容Jackson.
+
+gson的泛型处理逻辑:
+TypeToken<UniApiResult<GoodsInfoModel>> typeToken = new TypeToken<UniApiResult<GoodsInfoModel>>() {};
+通过Java的Type反射获取泛型一下你想
