@@ -1,7 +1,6 @@
-/Adder.java
-/AdderConstants.java
-/AdderTokenManager.java
 /ParseException.java
 /SimpleCharStream.java
 /Token.java
 /TokenMgrError.java
+/computerConstants.java
+/ComputerConstants.java

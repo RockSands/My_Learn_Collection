@@ -1,0 +1,95 @@
+options{  static = false;} PARSER_BEGIN(Computer)
+
+//定义包package javacc.mine;
+
+import java.io.PrintStream;
+//定义解析器名称Computer该类实现了四则运算
+public class Computer {
+  	// 定义参数
+	double previousValue = 0.0;
+	
+	public static void main(String[] args) throws ParseException, TokenMgrError, NumberFormatException {
+		Computer parser = new Computer(System.in);
+		parser.start(System.out);
+	}
+}PARSER_END(Computer)
+// 单空格为SKIP
+SKIP : { " " }
+// 换行符为EOL
+TOKEN : { < EOL: "\n" | "\r" | "\r\n" > } 
+TOKEN : { < PLUS : "+" > } 
+TOKEN : { < MINUS : "-" > } 
+TOKEN : { < TIMES : "*" > } 
+TOKEN : { < DIVIDE : "/" > } 
+TOKEN : { < NUMBER : <DIGITS> | <DIGITS> "." <DIGITS> | <DIGITS> "." | "." <DIGITS>> } 
+TOKEN : { < #DIGITS : (["0"-"9"])+ > } 
+TOKEN : { < OPEN_PAR : "(" > } 
+TOKEN : { < CLOSE_PAR : ")" > } 
+TOKEN : { < PREVIOUS : "$" > }
+
+/**
+ *启动,这里由上层Computer类调用
+ */
+void start(PrintStream printStream) throws NumberFormatException : 
+{} 
+{ 
+  ( 
+    previousValue = expression() 
+    { printStream.println( previousValue ) ; } 
+  )* 
+}
+
+double expression() throws NumberFormatException : 
+{  //第一个括号内部,定义该方法的临时变量
+  double i ; 
+  double value ; 
+} 
+{ 
+  value = term() 
+  (// 此处()表示分支,如果下个符号是PLUS或者MINUS的操作
+    <PLUS> 
+    i= term() 
+    { value += i ; } 
+    | 
+    <MINUS> 
+    i= term() 
+    { value -= i ; } 
+  )* 
+  { return value ; } 
+}
+double term() throws NumberFormatException : 
+{ 
+  double i ; 
+  double value ; 
+} 
+{ 
+  value = primary() 
+  ( 
+    <TIMES> 
+    i = primary() 
+    { value *= i ; } 
+    | 
+    <DIVIDE> 
+    i = primary() 
+    { value /= i ; } 
+  )* 
+  { return value ; } 
+}
+double primary() throws NumberFormatException : 
+{ 
+  Token t ; 
+  double d ; 
+} 
+{ 
+  t=<NUMBER> 
+  { return Double.parseDouble( t.image ) ; } 
+  | 
+  <PREVIOUS> 
+  { return previousValue ; } 
+  | 
+  <OPEN_PAR> d=expression() <CLOSE_PAR> 
+  { return d ; } 
+  | 
+  <MINUS> d=primary() 
+  { return -d ; } 
+}
