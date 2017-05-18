@@ -13,7 +13,7 @@ public class Computer {
 		parser.start(System.out);
 	}
 }PARSER_END(Computer)
-// 单空格为SKIP
+// 单空格为SKIP,SKIP为分割符,且改分隔符不会被解析器处理
 SKIP : { " " }
 // 换行符为EOL
 TOKEN : { < EOL: "\n" | "\r" | "\r\n" > } 
@@ -21,13 +21,13 @@ TOKEN : { < PLUS : "+" > }
 TOKEN : { < MINUS : "-" > } 
 TOKEN : { < TIMES : "*" > } 
 TOKEN : { < DIVIDE : "/" > } 
-TOKEN : { < NUMBER : <DIGITS> | <DIGITS> "." <DIGITS> | <DIGITS> "." | "." <DIGITS>> } 
+TOKEN : { < NUMBER : <DIGITS> | <DIGITS> "." <DIGITS> | <DIGITS> "." | "." <DIGITS>> }// #表示只能在Token声明中使用
 TOKEN : { < #DIGITS : (["0"-"9"])+ > } 
 TOKEN : { < OPEN_PAR : "(" > } 
 TOKEN : { < CLOSE_PAR : ")" > } 
 TOKEN : { < PREVIOUS : "$" > }
 
-/**
+/** * 以下均是解析器的定义,解析器就是对各个Token的解析.对应的事核心类的方法
  *启动,这里由上层Computer类调用
  */
 void start(PrintStream printStream) throws NumberFormatException : 

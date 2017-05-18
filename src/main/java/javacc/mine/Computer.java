@@ -12,7 +12,7 @@ public class Computer implements ComputerConstants {
                 parser.start(System.out);
         }
 
-/**
+/** * 以下均是解析器的定义,解析器就是对各个Token的解�?.对应的事核心类的方法
  *启动,这里由上层Computer类调�?
  */
   final public void start(PrintStream printStream) throws ParseException, NumberFormatException {
