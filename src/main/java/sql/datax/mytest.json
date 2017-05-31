@@ -1,0 +1,53 @@
+{
+    "job": {
+        "setting": {
+            "speed": {
+                 "channel":1
+            }
+        },
+        "content": [
+            {
+                "reader": {
+                    "name": "mysqlreader",
+                    "parameter": {
+                        "username": "root",
+                        "password": "123456",
+                        "connection": [
+                            {
+                                "querySql": [
+                                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary, salaries.from_date, salaries.to_date FROM employees, salaries WHERE salaries.emp_no = employees.emp_no;"
+                                ],
+                                "jdbcUrl": [
+                                    "jdbc:mysql://192.168.80.138:3306/employees"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "writer": {
+                    "name": "mysqlwriter",
+                    "parameter": {
+                        "writeMode": "replace",
+                        "username": "root",
+                        "password": "123456",
+                        "column": [
+                            "empID", "firstName", "lastName", "salary", "fromDate", "toDate"
+                        ],
+                        "session": [
+                        	"set session sql_mode='ANSI'"
+                        ],
+						"batchSize": 100,
+                        "connection": [
+                            {
+                                "jdbcUrl": "jdbc:mysql://192.168.80.138:3306/person",
+                                "table": [
+                                    "targetSalary"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}
