@@ -14,11 +14,11 @@ import org.pentaho.di.trans.steps.selectvalues.SelectValuesMeta;
 import org.pentaho.di.trans.steps.tableinput.TableInputMeta;
 
 /**
- * 创建一个转换,实现数据库迁移的功能
+ * 创建一个转换,实现数据库Insert/Update的功能
  * @author Administrator
  *
  */
-public class Main {
+public class InsertOrUpdateMain {
 	public static void main(String[] args) throws Exception {
 		// 初始化环境
 		KettleEnvironment.init();
