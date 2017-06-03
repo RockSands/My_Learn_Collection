@@ -1,7 +1,6 @@
 package sql.kettle;
 
 import org.pentaho.di.core.KettleEnvironment;
-import org.pentaho.di.core.NotePadMeta;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.util.EnvUtil;
 import org.pentaho.di.trans.Trans;
@@ -31,18 +30,18 @@ public class InsertOrUpdateMain {
 			/*
 			 * 获取数据
 			 */
-			DatabaseMeta sourceDataBase = new DatabaseMeta("sourceDataBase", "MySql", "Native", "192.168.80.138",
+			DatabaseMeta sourceDataBase = new DatabaseMeta("sourceDataBase", "MySQL", "Native", "192.168.80.138",
 					"employees", "3306", "root", "123456");
 			transMeta.addDatabase(sourceDataBase);
 
-			DatabaseMeta targetDatabase = new DatabaseMeta("targetDatabase", "MySql", "Native", "192.168.80.138",
+			DatabaseMeta targetDatabase = new DatabaseMeta("targetDatabase", "MySQL", "Native", "192.168.80.138",
 					"person", "3306", "root", "123456");
 			transMeta.addDatabase(targetDatabase);
 
-			String note = "Reads information from table [sourceDataBase] on database [" + sourceDataBase + "]";
-			note += "After that, it writes the information to table [person] on database [" + targetDatabase + "]";
-			NotePadMeta ni = new NotePadMeta(note, 150, 10, -1, -1);
-			transMeta.addNote(ni);
+			//String note = "Reads information from table [sourceDataBase] on database [" + sourceDataBase + "]";
+			//note += "After that, it writes the information to table [person] on database [" + targetDatabase + "]";
+			//NotePadMeta ni = new NotePadMeta(note, 150, 10, -1, -1);
+			//transMeta.addNote(ni);
 
 			String fromstepname = "read from [sourceDataBase]";
 			TableInputMeta tii = new TableInputMeta();
@@ -129,7 +128,7 @@ public class InsertOrUpdateMain {
 			 * 执行
 			 */
 			Trans trans = new Trans(transMeta);
-			trans.execute(null);
+			//trans.execute(null);
 			trans.waitUntilFinished();
 			// 转换构建完成
 		} catch (Exception e) {
