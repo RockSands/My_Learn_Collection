@@ -3,9 +3,6 @@ package web.crawler.webmagic;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
@@ -15,31 +12,25 @@ import com.gargoylesoftware.htmlunit.javascript.JavaScriptEngine;
 
 public class HttpUnitMain {
 
+	/**
+	 * 测试HTMLUnit抓取页面的能力,目前测试BrowserVersion不同区别很大,而且Unit不同版本支持浏览器驱动不一致,
+	 * 这里使用HtmlUnit-2.13 版本Firefox17能获取JS的静态信息
+	 * @param args
+	 * @throws FailingHttpStatusCodeException
+	 * @throws MalformedURLException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	public static void main(String[] args)
 			throws FailingHttpStatusCodeException, MalformedURLException, IOException, InterruptedException {
-		// WebClient webClient = new WebClient(BrowserVersion.FIREFOX_3_6);
-		// webClient.setJavaScriptEnabled(true);
-		// webClient.setCssEnabled(false);
-		// webClient.setJavaScriptEngine(new JavaScriptEngine(webClient));
-		// webClient.setAjaxController(new
-		// NicelyResynchronizingAjaxController());
-		// webClient.setTimeout(Integer.MAX_VALUE);
-		// webClient.setThrowExceptionOnScriptError(false);
-		// HtmlPage rootPage = webClient.getPage("http://angularjs.cn");
-		// System.out.println(rootPage.asXml());
-
-		WebClient webClient = new WebClient();
-		webClient.setJavaScriptEnabled(true); // 启用JS解释器，默认为true
-		webClient.setCssEnabled(false); // 禁用css支持
-		webClient.setThrowExceptionOnScriptError(false); // js运行错误时，是否抛出异常
-		webClient.setTimeout(20000);
-		HtmlPage page = webClient.getPage("http://angularjs.cn");
-		// 我认为这个最重要
-		String pageXml = page.asXml(); // 以xml的形式获取响应文本
-
-		/** jsoup解析文档 */
-		Document doc = Jsoup.parse(pageXml, "http://angularjs.cn/static/js/");
-		System.out.println(doc.html());
+		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_17);
+		webClient.getOptions().setJavaScriptEnabled(true);
+		webClient.getOptions().setCssEnabled(false);
+		webClient.getOptions().setTimeout(Integer.MAX_VALUE);
+		webClient.getOptions().setThrowExceptionOnScriptError(false);
+		webClient.setJavaScriptEngine(new JavaScriptEngine(webClient));
+		webClient.setAjaxController(new NicelyResynchronizingAjaxController());
+		HtmlPage rootPage = webClient.getPage("http://angularjs.cn");
+		System.out.println(rootPage.asXml());
 	}
-
 }
