@@ -1,0 +1,62 @@
+options
+{
+  static = false;
+}
+ 
+PARSER_BEGIN(Sqlparser)
+
+//定义包
+package javacc.mine.sqlparser;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
+//定义解析器名称Computer该类实现了四则运算
+public class Sqlparser {
+  	// 定义参数
+	List selectItems = new ArrayList();
+	
+	public static void main(String[] args) throws Exception, TokenMgrError {
+		Sqlparser parser = new Sqlparser(System.in);
+		parser.start(System.out);
+	}
+}
+
+PARSER_END(Sqlparser)
+
+// 分隔符不会被解析器处理
+SKIP : { "," }
+
+// #表示只能在Token声明中使用
+TOKEN : { < #BLANK : " " > }
+TOKEN : { < #NOTE : "." > }
+TOKEN : { < #OPEN_PAR : "(" > }
+TOKEN : { < #CLOSE_PAR : ")" > }
+TOKEN : { < #STR_AS : "AS" | "as" | "As" | "aS" > }
+TOKEN : { < #STR : ( ["a"-"z" , "A"-"Z"] )+ > }
+TOKEN : { < #NUM : ( ["1"-"9"] )+ > }
+TOKEN : { < #COM_STR: ( ["a"-"z" , "A"-"Z" , "1"-"9"] )+ > }
+TOKEN : { < #TABLE_COL_EXP : < COM_STR > < NOTE > < COM_STR > >}
+TOKEN : { < #ALIAS_EXR : (< BLANK >)+ (< STR_AS > (< BLANK >)+ ){ 0,1 } (< COM_STR >)>}
+TOKEN : { < #COL_EXP : (< BLANK >)+ (<TABLE_COL_EXP> | <COM_STR>)>}
+TOKEN : { < #NO_CLOSE_PAR : ~[")"] > } 
+TOKEN : { < #FUN_EXP : (< BLANK >)+ <STR> <OPEN_PAR> (<NO_CLOSE_PAR>)* <CLOSE_PAR>>  }
+TOKEN : { < SELECTITEM : (< FUN_EXP > | < COL_EXP > ) (< ALIAS_EXR >) {0,1} (< BLANK >)+>}
+
+void start(PrintStream printStream) throws Exception : 
+{} 
+{ 
+  ( 
+    expression() 
+    { printStream.println( selectItems ) ; } 
+  )* 
+}
+
+void expression() throws NumberFormatException : 
+{
+  Token t ;
+} 
+{ 
+  t = <SELECTITEM>
+  {selectItems.add(t.image);}
+}

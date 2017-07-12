@@ -1,6 +1,6 @@
 options{  static = false;} PARSER_BEGIN(Computer)
 
-//定义包package javacc.mine;
+//定义包package javacc.mine.computer;
 
 import java.io.PrintStream;
 //定义解析器名称Computer该类实现了四则运算
