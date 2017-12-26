@@ -31,9 +31,10 @@ public class WeightedRoundDistributer {
 	 */
 	private long weightSum = 0l;
 	/**
-	 * 权重的最大公约数
+	 * 运行时权重和
 	 */
-	private long weightDivisor = 0l;
+	private long runtimeWeightSum = 0l;
+
 	/**
 	 * 记录元素的Key
 	 */
@@ -47,10 +48,18 @@ public class WeightedRoundDistributer {
 	 */
 	private List<WeightElement> weightElements = new LinkedList<WeightElement>();
 
+	/**
+	 * 构造器
+	 */
 	private WeightedRoundDistributer() {
 
 	}
 
+	/**
+	 * 获取实例
+	 * 
+	 * @return
+	 */
 	public static WeightedRoundDistributer newInstance() {
 		return new WeightedRoundDistributer();
 	}
@@ -73,9 +82,6 @@ public class WeightedRoundDistributer {
 		if (element.getWeight() < 1) {
 			throw new RuntimeException("权重分配不能接纳权重为负数或零的权重元素[" + element.getKey() + "]!");
 		}
-		if (keys.contains(element.getKey())) {
-			throw new RuntimeException("权重分配已经包含了Key[" + element.getKey() + "]!");
-		}
 	}
 
 	/**
@@ -86,9 +92,37 @@ public class WeightedRoundDistributer {
 	 */
 	public synchronized WeightedRoundDistributer addWeightElement(WeightElement element) {
 		checkWeightElement(element);
+		if (keys.contains(element.getKey())) {
+			throw new RuntimeException("权重分配已经包含了Key[" + element.getKey() + "]!");
+		}
 		keys.add(element.getKey());
 		weightElements.add(element);
 		return this;
+	}
+
+	/**
+	 * 添加权重元素
+	 * 
+	 * @param key
+	 * @param weight
+	 * @return
+	 */
+	public synchronized WeightedRoundDistributer addWeightElement(String key, long weight) {
+		WeightElement element = new WeightElement(key, weight);
+		return addWeightElement(element);
+	}
+
+	/**
+	 * 添加权重元素
+	 * 
+	 * @param key
+	 * @param counter
+	 * @param weight
+	 * @return
+	 */
+	public synchronized WeightedRoundDistributer addWeightElement(String key, long counter, long weight) {
+		WeightElement element = new WeightElement(key, counter, weight);
+		return addWeightElement(element);
 	}
 
 	/**
@@ -198,12 +232,14 @@ public class WeightedRoundDistributer {
 	/**
 	 * 最小期望值下,单位权重代表数量
 	 * 
+	 * @param 最大公约数
 	 * @return
 	 */
-	private long minUnitWeight() {
+	private long minUnitWeight(long weightDivisor) {
 		long unitValue = 0l;
 		for (WeightElement element : runningtElements) {
-			unitValue = Math.max(unitValue, (long) Math.ceil(new Double(element.getCounter()) * weightDivisor / element.getWeight()));
+			unitValue = Math.max(unitValue,
+					(long) Math.ceil(new Double(element.getCounter()) * weightDivisor / element.getWeight()));
 		}
 		return unitValue;
 	}
@@ -222,7 +258,7 @@ public class WeightedRoundDistributer {
 			if (isStart) {// 如果为空,则未变更
 				return;
 			} else {// 如果为空,则未变更
-				throw new RuntimeException("权重分配未定义任何权重元素，无法启动");
+				throw new RuntimeException("权重分配未定义任何权重元素，无法启动!");
 			}
 		}
 		WeightElement index = null;
@@ -249,14 +285,39 @@ public class WeightedRoundDistributer {
 		weightSum = 0l;
 		for (Iterator<WeightElement> it = runningtElements.iterator(); it.hasNext();) {
 			indexRunning = it.next();
+			if (!keys.contains(indexRunning.getKey())) {// 如果Keys不存在,该权重元素已被删除
+				it.remove();
+				continue;
+			}
 			counter = counter + indexRunning.getCounter();
 			weightSum = weightSum + indexRunning.getWeight();
 		}
-		// 期待值计算
-		weightDivisor = greatestCommonDivisor();
+		/*
+		 * 期待值相关的计算
+		 */
+		// 权重的最大公约数
+		long weightDivisor = greatestCommonDivisor();
+		long minWeightSum = weightSum / weightDivisor;
+		// 期待值时,每个权重代表的数量
 		long unitValue = 0;
-		unitValue = (counter + expect) / (weightSum / weightDivisor);
-		unitValue = Math.max(unitValue, minUnitWeight());
+		unitValue = minUnitWeight(weightDivisor);
+		if (counter == 0 || counter == unitValue * minWeightSum) { // 直接为平稳期
+			for (WeightElement element : runningtElements) {
+				element.setCurrentWeight(0l);
+				element.setRuntimeWeight(element.getWeight());
+				runtimeWeightSum = weightSum;
+				expect = 0l;
+			}
+		} else {// 定义迁移期
+			unitValue = Math.max(unitValue, (counter + expect) / minWeightSum);
+			expect = unitValue * minWeightSum - counter;
+			runtimeWeightSum = expect;
+			// 设定运行时的权重
+			for (WeightElement element : runningtElements) {
+				element.setRuntimeWeight(unitValue * element.getWeight() / weightDivisor - element.getCounter());
+			}
+		}
+		isStart = true;
 	}
 
 	/**
@@ -265,7 +326,40 @@ public class WeightedRoundDistributer {
 	 * @return
 	 */
 	public synchronized String next() {
+		if (!isStart) {
+			throw new RuntimeException("权重分配未启动!");
+		}
+		String selectKey = pickKey();
+		if (expect > 1) {
+			expect--;
+		}
+		if (expect == 1) {
+			for (WeightElement element : runningtElements) {
+				element.setCurrentWeight(0l);
+				element.setRuntimeWeight(element.getWeight());
+				runtimeWeightSum = weightSum;
+			}
+			expect--;
+		}
+		counter ++;
+		return selectKey;
+	}
 
+	/**
+	 * 获取Key
+	 * 
+	 * @return
+	 */
+	private synchronized String pickKey() {
+		WeightElement pickElement = null;
+		for (WeightElement element : runningtElements) {
+			element.addWeight();
+			if (pickElement == null || pickElement.getCurrentWeight() < element.getCurrentWeight()) {
+				pickElement = element;
+			}
+		}
+		pickElement.hit(runtimeWeightSum);
+		return pickElement.getKey();
 	}
 
 }

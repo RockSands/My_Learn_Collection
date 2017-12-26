@@ -23,9 +23,9 @@ public class WeightElement {
 	private long weight;
 	
 	/**
-	 * 临时权重,负责计算
+	 * 运行时权重,负责计算
 	 */
-	private long temporaryWeight;
+	private long runtimeWeight;
 
 	/**
 	 * 当前权重
@@ -64,7 +64,7 @@ public class WeightElement {
 	 * @param weightSum
 	 */
 	public void addWeight(){
-		currentWeight = currentWeight + temporaryWeight;
+		currentWeight = currentWeight + runtimeWeight;
 	}
 	
 	/**
@@ -104,17 +104,17 @@ public class WeightElement {
 	}
 
 	/**
-	 * @return the temporaryWeight
+	 * @return the runtimeWeight
 	 */
-	public long getTemporaryWeight() {
-		return temporaryWeight;
+	public long getRuntimeWeight() {
+		return runtimeWeight;
 	}
 
 	/**
-	 * @param temporaryWeight the temporaryWeight to set
+	 * @param runtimeWeight the runtimeWeight to set
 	 */
-	public void setTemporaryWeight(long temporaryWeight) {
-		this.temporaryWeight = temporaryWeight;
+	public void setRuntimeWeight(long runtimeWeight) {
+		this.runtimeWeight = runtimeWeight;
 	}
 
 	/**
