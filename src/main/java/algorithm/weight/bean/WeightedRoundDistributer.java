@@ -1,5 +1,6 @@
 package algorithm.weight.bean;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -76,10 +77,10 @@ public class WeightedRoundDistributer {
 		if (element.getKey() == null || "".equals(element.getKey().trim())) {
 			throw new RuntimeException("权重分配不能接纳Key为空的元素!");
 		}
-		if (element.getCounter() < 0) {
+		if (element.getCounter() < 0l) {
 			throw new RuntimeException("权重分配不能接纳命中次数为负数的权重元素[" + element.getKey() + "]!");
 		}
-		if (element.getWeight() < 1) {
+		if (element.getWeight() < 1l) {
 			throw new RuntimeException("权重分配不能接纳权重为负数或零的权重元素[" + element.getKey() + "]!");
 		}
 	}
@@ -172,82 +173,9 @@ public class WeightedRoundDistributer {
 	}
 
 	/**
-	 * 计算公约数
-	 * 
-	 * @param a
-	 * @param b
-	 * @return
-	 */
-	private long greatestCommonDivisor(long a, long b) {
-		if (a < b) {
-			return greatestCommonDivisor(b, a);
-		}
-		if (0 == b) {
-			return a;
-		}
-		if (isTwo(a)) {
-			if (isTwo(b)) {
-				return greatestCommonDivisor(a / 2, b / 2) * 2;
-			}
-			return greatestCommonDivisor(a / 2, b);
-		} else {
-			if (isTwo(b)) {
-				return greatestCommonDivisor(a, b / 2);
-			}
-			return greatestCommonDivisor(b, a - b);
-		}
-
-	}
-
-	/**
-	 * 是否为2的倍数
-	 * 
-	 * @param a
-	 * @return
-	 */
-	private boolean isTwo(long a) {
-		if (0 == a % 2) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * 最小化权重,最大公约数处理
-	 * 
-	 * @return
-	 */
-	private long greatestCommonDivisor() {
-		// 最大公约数
-		long zdgys = greatestCommonDivisor(runningtElements.get(0).getWeight(), runningtElements.get(1).getWeight());
-		if (runningtElements.size() > 2) {
-			for (int index = 2, size = runningtElements.size(); index < size; index++) {
-				zdgys = greatestCommonDivisor(zdgys, runningtElements.get(index).getWeight());
-			}
-		}
-		return zdgys;
-	}
-
-	/**
-	 * 最小期望值下,单位权重代表数量
-	 * 
-	 * @param 最大公约数
-	 * @return
-	 */
-	private long minUnitWeight(long weightDivisor) {
-		long unitValue = 0l;
-		for (WeightElement element : runningtElements) {
-			unitValue = Math.max(unitValue,
-					(long) Math.ceil(new Double(element.getCounter()) * weightDivisor / element.getWeight()));
-		}
-		return unitValue;
-	}
-
-	/**
 	 * 启动
 	 */
-	public synchronized void start() {
+	public synchronized WeightedRoundDistributer start() {
 		if (keys.isEmpty()) {
 			throw new RuntimeException("权重分配未定义任何权重元素，无法启动");
 		}
@@ -256,7 +184,7 @@ public class WeightedRoundDistributer {
 		}
 		if (weightElements.isEmpty()) {
 			if (isStart) {// 如果为空,则未变更
-				return;
+				return this;
 			} else {// 如果为空,则未变更
 				throw new RuntimeException("权重分配未定义任何权重元素，无法启动!");
 			}
@@ -299,9 +227,9 @@ public class WeightedRoundDistributer {
 		long weightDivisor = greatestCommonDivisor();
 		long minWeightSum = weightSum / weightDivisor;
 		// 期待值时,每个权重代表的数量
-		long unitValue = 0;
+		long unitValue = 0l;
 		unitValue = minUnitWeight(weightDivisor);
-		if (counter == 0 || counter == unitValue * minWeightSum) { // 直接为平稳期
+		if (counter == 0l || counter == unitValue * minWeightSum) { // 直接为平稳期
 			for (WeightElement element : runningtElements) {
 				element.setCurrentWeight(0l);
 				element.setRuntimeWeight(element.getWeight());
@@ -318,6 +246,47 @@ public class WeightedRoundDistributer {
 			}
 		}
 		isStart = true;
+		return this;
+	}
+
+	/**
+	 * @return the runningtElements
+	 */
+	public synchronized List<WeightElement> getWeightElements() {
+		List<WeightElement> list = null;
+		if (!isStart) {
+			list = new ArrayList<WeightElement>(weightElements.size());
+			for (WeightElement element : weightElements) {
+				list.add(new WeightElement(element.getKey(), element.getCounter(), element.getWeight()));
+			}
+		} else {
+			list = new ArrayList<WeightElement>(runningtElements.size());
+			for (WeightElement element : runningtElements) {
+				list.add(new WeightElement(element.getKey(), element.getCounter(), element.getWeight()));
+			}
+		}
+		return list;
+	}
+
+	/**
+	 * @return the isStart
+	 */
+	public boolean isStart() {
+		return isStart;
+	}
+
+	/**
+	 * @return the counter
+	 */
+	public long getCounter() {
+		return counter;
+	}
+
+	/**
+	 * @return the keys
+	 */
+	public Set<String> getKeys() {
+		return keys;
 	}
 
 	/**
@@ -330,19 +299,112 @@ public class WeightedRoundDistributer {
 			throw new RuntimeException("权重分配未启动!");
 		}
 		String selectKey = pickKey();
-		if (expect > 1) {
+		if (expect > 1l) {
 			expect--;
 		}
-		if (expect == 1) {
+		if (expect == 1l) {
 			for (WeightElement element : runningtElements) {
 				element.setCurrentWeight(0l);
 				element.setRuntimeWeight(element.getWeight());
-				runtimeWeightSum = weightSum;
 			}
-			expect--;
+			runtimeWeightSum = weightSum;
+			expect = 0l;
 		}
-		counter ++;
+		counter++;
 		return selectKey;
+	}
+
+	/**
+	 * 结算,返回之前执行的记录并从头开始进行
+	 * 
+	 * @return
+	 */
+	public synchronized List<WeightElement> settlement() {
+		if (!isStart) {
+			throw new RuntimeException("权重分配未启动!");
+		}
+		List<WeightElement> list = new ArrayList<WeightElement>(runningtElements.size());
+		for (WeightElement element : runningtElements) {
+			list.add(new WeightElement(element.getKey(), element.getCounter(), element.getWeight()));
+			element.settlement();
+		}
+		expect = 0l;
+		runtimeWeightSum = weightSum;
+		counter = 0l;
+		return list;
+	}
+
+	/**
+	 * 计算公约数
+	 * 
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private long greatestCommonDivisor(long a, long b) {
+		if (a < b) {
+			return greatestCommonDivisor(b, a);
+		}
+		if (0 == b) {
+			return a;
+		}
+		if (isTwo(a)) {
+			if (isTwo(b)) {
+				return greatestCommonDivisor(a / 2, b / 2) * 2;
+			}
+			return greatestCommonDivisor(a / 2, b);
+		} else {
+			if (isTwo(b)) {
+				return greatestCommonDivisor(a, b / 2);
+			}
+			return greatestCommonDivisor(b, a - b);
+		}
+
+	}
+
+	/**
+	 * 是否为2的倍数
+	 * 
+	 * @param a
+	 * @return
+	 */
+	private boolean isTwo(long a) {
+		if (0 == a % 2l) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * 最小化权重,最大公约数处理
+	 * 
+	 * @return
+	 */
+	private long greatestCommonDivisor() {
+		// 最大公约数
+		long zdgys = greatestCommonDivisor(runningtElements.get(0).getWeight(), runningtElements.get(1).getWeight());
+		if (runningtElements.size() > 2) {
+			for (int index = 2, size = runningtElements.size(); index < size; index++) {
+				zdgys = greatestCommonDivisor(zdgys, runningtElements.get(index).getWeight());
+			}
+		}
+		return zdgys;
+	}
+
+	/**
+	 * 最小期望值下,单位权重代表数量
+	 * 
+	 * @param 最大公约数
+	 * @return
+	 */
+	private long minUnitWeight(long weightDivisor) {
+		long unitValue = 0l;
+		for (WeightElement element : runningtElements) {
+			unitValue = Math.max(unitValue,
+					(long) Math.ceil(new Double(element.getCounter()) * weightDivisor / element.getWeight()));
+		}
+		return unitValue;
 	}
 
 	/**
@@ -361,5 +423,4 @@ public class WeightedRoundDistributer {
 		pickElement.hit(runtimeWeightSum);
 		return pickElement.getKey();
 	}
-
 }

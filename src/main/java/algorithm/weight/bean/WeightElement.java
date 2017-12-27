@@ -55,8 +55,9 @@ public class WeightElement {
 	 * 结算
 	 */
 	public void settlement(){
-		counter = 0;
-		currentWeight = 0;
+		counter = 0l;
+		currentWeight = 0l;
+		runtimeWeight = weight;
 	}
 	
 	/**
