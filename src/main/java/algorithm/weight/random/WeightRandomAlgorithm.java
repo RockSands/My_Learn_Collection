@@ -68,19 +68,17 @@ public class WeightRandomAlgorithm {
 	}
 
 	public void init() {
-		Server s1 = new Server("192.168.0.100", 0, 1);
-		Server s2 = new Server("192.168.0.101", 1, 2);
-		Server s3 = new Server("192.168.0.102", 3, 3);
-		Server s4 = new Server("192.168.0.103", 6, 4);
-		Server s5 = new Server("192.168.0.104", 10, 5);
-		sumWeight = 1 + 2 + 3 + 4 + 5;
+		Server s1 = new Server("A", 0, 1);
+		Server s2 = new Server("B", 1, 2);
+		Server s3 = new Server("C", 3, 3);
+		Server s4 = new Server("D", 6, 4);
+		sumWeight = 1 + 2 + 3 + 4;
 		random = new Random();
 		serverList = new ArrayList<Server>();
 		serverList.add(s1);
 		serverList.add(s2);
 		serverList.add(s3);
 		serverList.add(s4);
-		serverList.add(s5);
 	}
 
 	public static void main(String[] args) {
@@ -89,15 +87,15 @@ public class WeightRandomAlgorithm {
 
 		Map<String, Integer> countResult = new HashMap<String, Integer>();
 
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < 100; i++) {
 			Server s = obj.GetServer();
-			String log = "ip:" + s.ip + ";weight:" + s.weight;
+			String log = s.ip + "\t";
 			if (countResult.containsKey(log)) {
 				countResult.put(log, countResult.get(log) + 1);
 			} else {
 				countResult.put(log, 1);
 			}
-			System.out.println(log);
+			System.out.print(log);
 		}
 
 		for (Entry<String, Integer> map : countResult.entrySet()) {
